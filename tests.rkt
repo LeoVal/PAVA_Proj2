@@ -2,6 +2,8 @@
 (require "preprocess.rkt")
 
 (define verbose #f)
+(define total-tests 0)
+(define passed-tests 0)
 
 ; Run all tests in the given folder.
 ; recursive calls ensure nested folders are scanned
@@ -31,10 +33,10 @@
       [in-string  (file->string (path->string in-file))]
       [out-string (file->string (path->string out-file))]
       [process-result (process-string in-string)])
-
+    (increment-total-tests)
     ; Print result and clean windows line-endings
     (if (equal? process-result out-string)
-        (values " \u2713")
+        (and (increment-passing-tests) (values " \u2713"))
         (values (string-append "\u2718"
                                (if (equal? verbose #t)
                                    (string-append "\n======== output was =========\n"
@@ -43,7 +45,10 @@
                                                   "============= expectation was ==================\n"
                                                   (string-replace out-string "\r\n" "\n"))
                                    (values "")))))))
-
-
+(define (increment-total-tests)
+  (set! total-tests (add1 total-tests)))
+(define (increment-passing-tests)
+  (set! passed-tests (add1 passed-tests)))
 ;; Run the tests here
 (run-tests (path->complete-path (build-path (current-directory) "resources")))
+(print (string-append "Result: " (number->string passed-tests) "/" (number->string total-tests) " tests passing"))
