@@ -7,3 +7,12 @@
   values "")
 (define (process-string string)
   values string)
+
+
+
+;;;;; Some regex here
+
+;;: Alias matcher
+;; Capture the alias name and the matching expression
+;; under the named groups 'aliasName' and 'aliasExpr'
+; alias[^\S]+(?<aliasName>[^=\s]+)[\s+]*=[\s+]*(?<aliasExpr>[^;]*);
