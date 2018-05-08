@@ -89,6 +89,24 @@
              (substring str (+ i 1))))
 ""))
 
+; Process a string and replace the existing alias in it.
+; (alias-processor "this alias should survive; maybe this alias=another alias?; alias 123 = body; i guess 123 should change to body;")
+; (alias-processor "alias 123 = body; alias 234 = anotherbody; whos better? 123 or 234?")
+(define (alias-processor string)
+  (let ([alias-matcher-pattern #px"alias[\\s]+([\\w]+)[\\s]*=[\\s]*([^;]+);"])
+    (for ([matched-string (regexp-match* alias-matcher-pattern string)])
+      (begin
+        ;; take away the matched-string to prevent wrong replacements
+        (set! string (regexp-replace matched-string string ""))
+
+        ;; do the actual matching
+        (let* ([alias-name (regexp-replace alias-matcher-pattern matched-string "\\1")]
+               [alias-expr (regexp-replace alias-matcher-pattern matched-string "\\2")]
+               [alias-name-pattern (pregexp (format "\\b~a\\b" alias-name))])
+          (set! string (regexp-replace alias-name-pattern string alias-expr))
+          )))
+    string))
+
 
 (process-string "dads ;; dsads
  dsa d")
