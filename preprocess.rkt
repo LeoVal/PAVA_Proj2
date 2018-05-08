@@ -32,32 +32,37 @@
   )
 
 (define (apply-active-tokens key value string)
- (let*
-     ((result-string (string-copy string)) ;; to store the formatted string
-      (match-position (car (regexp-match-positions key result-string))) ;; the position of the last match with the token
-      (match-counts (length (regexp-match-positions* key result-string))) ;; number of matches
+  (if (equal? #f (regexp-match-positions key string))
+      string      ;; no match return the string
+      (let*
+          ((result-string (string-copy string)) ;; to store the formatted string
+           (match-position (car (regexp-match-positions key result-string))) ;; the position of the last match with the token
+           (match-counts (length (regexp-match-positions* key result-string))) ;; number of matches
+           )
+        (begin
+          (for/list ([i match-counts]) ;; for i< match-counts
+            
+            (if (equal? #f match-position)
+                #f
+                (begin
+                  (writeln (string-append " BEFORE " result-string))
+                  (writeln (string-append " RESULT: " (~a (car match-position)) "and" (~a (cdr match-position))))
+                  (set! result-string (string-append
+                                       (substring result-string 0 (car match-position))
+                                       (value (substring result-string (cdr match-position) )) ;; process the string bettween the match
+                                       ;; (substring result-string (cdr match-position))
+                                       )
+                        )
+                  (set! match-position (if (regexp-match-positions key result-string)(car (regexp-match-positions key result-string)) #f))
+                  (writeln (string-append " AFTER " result-string))
+                  )
+                
+                )
+            ) ;; aqui obtemos as posições
+          result-string
+          )
+        )
       )
-   
-   (for/list ([i match-counts]) ;; for i< match-counts
-
-     (if (equal? #f match-position)
-         #f
-     (begin
-       (writeln (string-append " BEFORE " result-string))
-       (writeln (string-append " RESULT: " (~a (car match-position)) "and" (~a (cdr match-position))))
-       (set! result-string (string-append
-                            (substring result-string 0 (car match-position))
-                            (value (substring result-string (cdr match-position) )) ;; process the string bettween the match
-                           ;; (substring result-string (cdr match-position))
-                            )
-             )
-       (set! match-position (if (regexp-match-positions key result-string)(car (regexp-match-positions key result-string)) #f))
-       (writeln (string-append " AFTER " result-string))
-       )
-     
-     )
-     ) ;; aqui obtemos as posições
-   )
   )
 
 
@@ -87,3 +92,15 @@
 
 (process-string "dads ;; dsads
  dsa d")
+
+
+(define ns (make-base-namespace))
+(def-active-token "//eval " (str)
+(call-with-input-string
+str
+(lambda (in)
+(string-append (~a (eval (read in) ns))
+(port->string in)))))
+
+
+(process-string "if (curYear > //eval (date-year (seconds->date (current-seconds)))) {")
