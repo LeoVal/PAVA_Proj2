@@ -39,18 +39,23 @@
       )
    
    (for/list ([i match-counts]) ;; for i< match-counts
+
+     (if (equal? #f match-position)
+         #f
      (begin
        (writeln (string-append " BEFORE " result-string))
        (writeln (string-append " RESULT: " (~a (car match-position)) "and" (~a (cdr match-position))))
        (set! result-string (string-append
                             (substring result-string 0 (car match-position))
-                            (value (substring result-string (car match-position) (cdr match-position))) ;; process the string bettween the match
-                            (substring result-string (cdr match-position))
+                            (value (substring result-string (cdr match-position) )) ;; process the string bettween the match
+                           ;; (substring result-string (cdr match-position))
                             )
              )
        (set! match-position (if (regexp-match-positions key result-string)(car (regexp-match-positions key result-string)) #f))
+       (writeln (string-append " AFTER " result-string))
        )
-     (writeln (string-append " AFTER " result-string))
+     
+     )
      ) ;; aqui obtemos as posições
    )
   )
@@ -77,7 +82,8 @@
                (i (in-naturals)))
         (and (char=? c #\newline)
              (substring str (+ i 1))))
-      ""))
+""))
 
 
-(process-string "dads ;; dsads ;; dsa d")
+(process-string "dads ;; dsads
+ dsa d")
