@@ -93,7 +93,7 @@
 ; (alias-processor "this alias should survive; maybe this alias=another alias?; alias 123 = body; i guess 123 should change to body;")
 ; (alias-processor "alias 123 = body; alias 234 = anotherbody; whos better? 123 or 234?")
 (define (alias-processor string)
-  (let ([alias-matcher-pattern #px"alias[\\s]+([\\w]+)[\\s]*=[\\s]*([^;]+);"])
+  (let ([alias-matcher-pattern #px"\\balias[\\s]+([\\w]+)[\\s]*=[\\s]*([^;]+);"])
     (for ([matched-string (regexp-match* alias-matcher-pattern string)])
       (begin
         ;; take away the matched-string to prevent wrong replacements
