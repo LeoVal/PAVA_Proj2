@@ -89,9 +89,16 @@
              (substring str (+ i 1))))
 ""))
 
-; Process a string and replace the existing alias in it.
+
 ; (alias-processor "this alias should survive; maybe this alias=another alias?; alias 123 = body; i guess 123 should change to body;")
 ; (alias-processor "alias 123 = body; alias 234 = anotherbody; whos better? 123 or 234?")
+; (type-inference-processor "somevar string = new String()")
+; (type-inference-processor "some var string = newString()")
+; (type-inference-processor "var something = new Something<OtherThing>()")
+; (type-inference-processor "var whitespaces = new     WhiteSpace<Parameter, Parameter< Spaced,       Parameter>>()")
+; (type-inference-processor (alias-processor "alias someAlias=somethingNew<Parameter>; var variable=new someAlias();"))   <- Bugged when alias has a ( character. the () character represent a capture group and in the first instruction of alias processor the string is not striped of this token
+
+; Process a string and replace the existing alias in it.
 (define (alias-processor string)
   (let ([alias-matcher-pattern #px"\\balias[\\s]+([\\w]+)[\\s]*=[\\s]*([^;]+);"])
     (for ([matched-string (regexp-match* alias-matcher-pattern string)])
@@ -103,8 +110,17 @@
         (let* ([alias-name (regexp-replace alias-matcher-pattern matched-string "\\1")]
                [alias-expr (regexp-replace alias-matcher-pattern matched-string "\\2")]
                [alias-name-pattern (pregexp (format "\\b~a\\b" alias-name))])
-          (set! string (regexp-replace alias-name-pattern string alias-expr))
-          )))
+          (set! string (regexp-replace alias-name-pattern string alias-expr)))))
+    string))
+
+; Infer the type of a var keyword and replace it with the type declared ahead
+(define (type-inference-processor string)
+  (let ([type-inference-pattern #px"\\bvar([\\s]+[\\w]+[\\s]*=[\\s]*\\bnew\\b[\\s]*([^\\(]+))"])
+    (for ([matched-string (regexp-match* type-inference-pattern string)])
+      (begin
+        (let* ([infered-type (regexp-replace type-inference-pattern matched-string "\\2")]
+               [statement-body (regexp-replace type-inference-pattern matched-string "\\1")])
+          (set! string (regexp-replace matched-string string (string-append infered-type statement-body))))))
     string))
 
 
