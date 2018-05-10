@@ -31,7 +31,7 @@
       (for ([key keys])
         (set! result (apply-active-tokens key (hash-ref ht key) result))
         )
-      result
+      (if (equal? result string ) result (process-string result))
       )
     )
   )
