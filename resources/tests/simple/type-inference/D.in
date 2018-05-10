@@ -3,7 +3,7 @@ public class Foo {
     public static void main(String[] args) {
 		var foo = new Foo() {
             public void bar() {
-            	 var name = new String("Baz")
+            	 var name = new String("Baz");
                  System.out.println("Quux " + name);
             }
         };

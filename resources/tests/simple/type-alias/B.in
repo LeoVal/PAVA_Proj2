@@ -1,6 +1,6 @@
 alias Cache = ConcurrentSkipListMap<String,List<Map<String,Object>>>;
 public class Foo {
 	public static Cache mergeCaches(Cache a, Cache b) {
-		Cache var = new Cache();
+		Cache vary = new Cache();
 	}
 }

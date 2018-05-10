@@ -3,7 +3,7 @@ public class Foo {
     public static void main(String[] args) {
 		Foo foo = new Foo() {
             public void bar() {
-            	 String name = new String("Baz")
+            	 String name = new String("Baz");
                  System.out.println("Quux " + name);
             }
         };
