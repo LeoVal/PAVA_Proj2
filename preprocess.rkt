@@ -183,6 +183,41 @@
     string)
   )
 
+; String interpolation
+(def-active-token "#getset" (string)
+  (let (
+        [pattern #px"#getset\\s*((\\w*)\\s+(\\w+)\\s+(\\w+)\\S+\\s*;)\\s*(\\{(get;)?(set;)?\\})"]
+        )
+    (for ([matched-string (regexp-match* pattern string)])
+      (let*
+          (
+           [attribute (string-trim (regexp-replace pattern matched-string "\\1"))]
+           [encapsulation (regexp-replace pattern matched-string "\\2")]
+           [attribute-name (regexp-replace pattern matched-string "\\4")]
+           [attribute-type (regexp-replace pattern matched-string "\\3")]
+           [attribute-get (non-empty-string?(regexp-replace pattern matched-string "\\6"))]
+           [attribute-set (non-empty-string?(regexp-replace pattern matched-string "\\7"))]
+           )
+        (set! string (string-replace string matched-string
+                                     (string-append
+                                      ""
+                                      attribute "\n\n"
+          (if (equal? #t attribute-get)
+              (string-append (if (non-empty-string? encapsulation) (string-append encapsulation " ")  " ") attribute-type " get" (string-titlecase attribute-name) "(){\n"
+                             "\t return this." attribute-name ";\n"
+                             "}\n\n" ) "")
+           (if (equal? #t attribute-set)
+               (string-append (if (non-empty-string? encapsulation) (string-append encapsulation " ")  " ")  "void set" (string-titlecase attribute-name) "(" attribute-type " " attribute-name "){\n"
+                             "\t this." attribute-name "=" attribute-name ";\n"
+                             "}\n\n" ) "")
+           )
+                                     ))
+        )
+      )
+    string)
+  )
+
+
 ;(process-string "dads ;; dsads
 ;dsa d")
 
@@ -198,6 +233,8 @@ str
 
 ;(process-string "if (curYear > //eval (date-year (seconds->date (current-seconds)))) {")
 ;(process-string "var something = new Something<OtherThing>()")
-(process-string "#include \".\\resources\\tests\\simple\\include\\A.include\"
-dsadasd")
+(process-string "#getset int pinaple=djkasndkjs; {get;set;}
+
+#getset public int pinaple=djkasndkjs; {set;}
+")
 
