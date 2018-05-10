@@ -167,7 +167,21 @@
     string)
   )
 
-
+; String interpolation
+(def-active-token "#include" (string)
+  (let (
+        [iclude-pattern #px"#include\\s*\"(\\S+)\""]
+        )
+    (for ([matched-string (regexp-match* iclude-pattern string)])
+      (let*
+          (
+           [filepath (regexp-replace iclude-pattern matched-string "\\1")]
+           )
+        (set! string (string-replace string matched-string (process-string (if (file-exists? filepath ) (file->string filepath) ""))))
+        )
+      )
+    string)
+  )
 
 ;(process-string "dads ;; dsads
 ;dsa d")
@@ -184,11 +198,6 @@ str
 
 ;(process-string "if (curYear > //eval (date-year (seconds->date (current-seconds)))) {")
 ;(process-string "var something = new Something<OtherThing>()")
-(process-string "public class Foo {
-    public String foo(String[] args) {
-    	alias a1 = arg1;
-    	var a1 = new String[](){(#\"#{args[0]}\" + #\"{a+b}\")};
-    	return a1.toString();
-    }
-}")
+(process-string "#include \".\\resources\\tests\\simple\\include\\A.include\"
+dsadasd")
 
