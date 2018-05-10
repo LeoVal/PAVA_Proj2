@@ -1,0 +1,6 @@
+#include ".\resources\tests\simple\complex-test\A.include"
+
+public void print() {
+	var someValue = new includedAlias();
+	System.out.println(#"will #{includedAlias.staticFunction(getIncluded())} and #{includedAlias.staticFunction(someValue)} be the same?");
+}

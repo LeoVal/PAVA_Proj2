@@ -1,0 +1,2 @@
+#include ".\resources\tests\simple\complex-test\A.include2"
+#getset private includedAlias included; { get; set; }

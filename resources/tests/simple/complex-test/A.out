@@ -1,0 +1,17 @@
+
+private includedAlias included;
+
+private includedAlias getInclude(){
+	 return this.include;
+}
+
+private void setInclude(includedAlias include){
+	 this.include=include;
+}
+
+
+
+public void print() {
+	someIncludedType someValue = new someIncludedType();
+	System.out.println("will " + (someIncludedType.staticFunction(getIncluded())) + "and " + (someIncludedType.staticFunction(someValue)) + "be the same?");
+}
