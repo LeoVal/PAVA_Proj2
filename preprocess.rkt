@@ -22,8 +22,19 @@
 
 ;; processes the string with the active tokens
 (define (process-string string)
-  (hash-for-each ht (get-proc-function string))
- )
+  (let
+      (
+       (keys (hash-keys ht))
+       (result (string-copy string))
+       )
+    (begin
+      (for ([key keys])
+        (set! result (apply-active-tokens key (hash-ref ht key) result))
+        )
+      result
+      )
+    )
+  )
 
 ;;Creates a clausure to be used on the hash-for-each with the string to be processed in
 ;; the apply-active-tokens for each token and respective function
@@ -45,16 +56,16 @@
             (if (equal? #f match-position)
                 #f
                 (begin
-                  (writeln (string-append " BEFORE " result-string))
-                  (writeln (string-append " RESULT: " (~a (car match-position)) "and" (~a (cdr match-position))))
+                 ; (writeln (string-append " BEFORE " result-string))
+                  ;(writeln (string-append " RESULT: " (~a (car match-position)) "and" (~a (cdr match-position))))
                   (set! result-string (string-append
                                        (substring result-string 0 (car match-position))
-                                       (value (substring result-string (cdr match-position) )) ;; process the string bettween the match
+                                       (value (substring result-string (car match-position) )) ;; process the string bettween the match
                                        ;; (substring result-string (cdr match-position))
                                        )
                         )
                   (set! match-position (if (regexp-match-positions key result-string)(car (regexp-match-positions key result-string)) #f))
-                  (writeln (string-append " AFTER " result-string))
+                  ;(writeln (string-append " AFTER " result-string))
                   )
                 
                 )
@@ -99,33 +110,67 @@
 ; (type-inference-processor (alias-processor "alias someAlias=somethingNew<Parameter>; var variable=new someAlias();"))   <- Bugged when alias has a ( character. the () character represent a capture group and in the first instruction of alias processor the string is not striped of this token
 
 ; Process a string and replace the existing alias in it.
-(define (alias-processor string)
-  (let ([alias-matcher-pattern #px"\\balias[\\s]+([\\w]+)[\\s]*=[\\s]*([^;]+);"])
+(def-active-token "alias" (string)
+  (let ([alias-matcher-pattern #px"\\balias[\\s]+([\\S]+)[\\s]*=[\\s]*([^;]+);[[:blank:]]*"])
     (for ([matched-string (regexp-match* alias-matcher-pattern string)])
       (begin
         ;; take away the matched-string to prevent wrong replacements
-        (set! string (regexp-replace matched-string string ""))
-
+        ;(println "hee")
+        ;(println string)
+        (set! string (string-replace string matched-string ""))
+        ;(println string)
         ;; do the actual matching
         (let* ([alias-name (regexp-replace alias-matcher-pattern matched-string "\\1")]
                [alias-expr (regexp-replace alias-matcher-pattern matched-string "\\2")]
-               [alias-name-pattern (pregexp (format "\\b~a\\b" alias-name))])
-          (set! string (regexp-replace alias-name-pattern string alias-expr)))))
+               [is-word (regexp-match #px"^[\\w]*$" alias-name)]
+               [alias-name-pattern (pregexp (if (equal? #f is-word) (regexp-quote alias-name) (format "\\b~a\\b" (regexp-quote alias-name)) ))])
+           (begin ;(println alias-name) (println alias-expr) (println alias-name-pattern)  (println matched-string) (println string)
+          (set! string (string-replace string alias-name-pattern alias-expr))))))
     string))
 
 ; Infer the type of a var keyword and replace it with the type declared ahead
-(define (type-inference-processor string)
+(def-active-token "var" (string)
   (let ([type-inference-pattern #px"\\bvar([\\s]+[\\w]+[\\s]*=[\\s]*\\bnew\\b[\\s]*([^\\(]+))"])
     (for ([matched-string (regexp-match* type-inference-pattern string)])
       (begin
         (let* ([infered-type (regexp-replace type-inference-pattern matched-string "\\2")]
                [statement-body (regexp-replace type-inference-pattern matched-string "\\1")])
-          (set! string (regexp-replace matched-string string (string-append infered-type statement-body))))))
+          (begin ;(println infered-type) (println statement-body) (println matched-string) (println string)
+                 
+          (set! string (string-replace string matched-string (string-append infered-type statement-body)))))))
     string))
 
 
-(process-string "dads ;; dsads
- dsa d")
+; String interpolation
+(def-active-token "#" (string)
+  (let (
+        [type-inference-pattern #px"#\"([^\"]*)\""]
+        [type-inference-pattern-interpolation "#{([^}]+)}"]
+        )
+    (for ([matched-string (regexp-match* type-inference-pattern string)])
+      (begin
+        (let* ([statement-body (regexp-replace type-inference-pattern matched-string "\\1")]
+               [statement-body-replica (regexp-replace type-inference-pattern matched-string "\\1")])
+          (begin
+            (for ([matched-interpolation-var (regexp-match* type-inference-pattern-interpolation statement-body)])
+              (begin
+                (let* ([statement-var (regexp-replace type-inference-pattern-interpolation matched-interpolation-var "\\1")])
+                  (set! statement-body  (string-replace statement-body (string-append "#{" statement-var "}") (string-append "\" + (" statement-var ") + \"")))
+                  )
+                )
+              )
+            (set! string (string-replace string (string-append "#\"" statement-body-replica "\"") (string-append "\"" statement-body "\"")))
+            )
+          ) 
+        )
+      )
+    string)
+  )
+
+
+
+;(process-string "dads ;; dsads
+;dsa d")
 
 
 (define ns (make-base-namespace))
@@ -137,4 +182,13 @@ str
 (port->string in)))))
 
 
-(process-string "if (curYear > //eval (date-year (seconds->date (current-seconds)))) {")
+;(process-string "if (curYear > //eval (date-year (seconds->date (current-seconds)))) {")
+;(process-string "var something = new Something<OtherThing>()")
+(process-string "public class Foo {
+    public String foo(String[] args) {
+    	alias a1 = arg1;
+    	var a1 = new String[](){(#\"#{args[0]}\" + #\"{a+b}\")};
+    	return a1.toString();
+    }
+}")
+
