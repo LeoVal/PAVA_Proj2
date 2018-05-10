@@ -1,1 +1,0 @@
-tornar funcional, neste momento faz tudo ok mas não retorna a string (tamber por causa do for each que convem mudar)

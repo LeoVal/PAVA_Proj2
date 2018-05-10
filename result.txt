@@ -1,1 +1,0 @@
-"class Foo { \n\t\n\n\t\n\n\tpublic static Double m (int s) {\n\t\tDouble a = 2.0, b = 1.99;\n\t\tDouble c;\n\n\t\treturn (Double) a + b;\n\t}\n\n\talias (dbl) = (Double);\n\t\n\t\n\n\tpublic static Double m (Integer s) {\n\t\treturn (dbl)(Integer.valueOf(2.0) + 0);\n\t}\n\n\tpublic static main(String[] args) {\n\t\tSystem.out.println(\"This test has 24 lines :O\");\n\t}\n}\n"
