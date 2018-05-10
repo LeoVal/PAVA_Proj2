@@ -111,7 +111,7 @@
 
 ; Process a string and replace the existing alias in it.
 (def-active-token "alias" (string)
-  (let ([alias-matcher-pattern #px"\\balias[\\s]+([\\S]+)[\\s]*=[\\s]*([^;]+);[[:blank:]]*"])
+  (let ([alias-matcher-pattern #px"\\balias[\\s]+([\\S]+)[\\s]*=[\\s]*([^;]+);"])
     (for ([matched-string (regexp-match* alias-matcher-pattern string)])
       (begin
         ;; take away the matched-string to prevent wrong replacements
