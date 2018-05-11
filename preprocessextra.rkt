@@ -8,14 +8,14 @@
   (let ([iclude-pattern #px"#include\\s*\"(\\S+)\""])
     (for ([matched-string (regexp-match* iclude-pattern string)])
       (let* ( [filepath (regexp-replace iclude-pattern matched-string "\\1")])
-        (set! string (string-replace string matched-string (if (file-exists? filepath ) (file->string filepath) "")))
+        (set! string (string-replace string matched-string (if (file-exists? filepath ) (file->string filepath) string)))
         )
       )
     string))
 
 ; Getter and setter generation
 (def-active-token "#getset" (string)
-  (let ([pattern #px"#getset\\s*((\\w*)\\s+(\\w+)\\s+(\\w+)\\S+\\s*;)\\s*(\\{\\s*(get;)?\\s*(set;)?\\s*\\})"])
+  (let ([pattern #px"#getset\\s*((\\w*)\\s+(\\w+)\\s+(\\w+)\\S*\\s*;)\\s*(\\{\\s*(get;)?\\s*(set;)?\\s*\\})"])
     (for ([matched-string (regexp-match* pattern string)])
       (let* ([attribute (string-trim (regexp-replace pattern matched-string "\\1"))]
              [encapsulation (regexp-replace pattern matched-string "\\2")]

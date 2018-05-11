@@ -1,12 +1,12 @@
 
 private someIncludedType included;
 
-private someIncludedType getInclude(){
-	 return this.include;
+private someIncludedType getIncluded(){
+	 return this.included;
 }
 
-private void setInclude(someIncludedType include){
-	 this.include=include;
+private void setIncluded(someIncludedType included){
+	 this.included=included;
 }
 
 
