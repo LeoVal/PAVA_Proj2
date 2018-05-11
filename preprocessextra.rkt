@@ -8,7 +8,9 @@
   (let ([iclude-pattern #px"#include\\s*\"(\\S+)\""])
     (for ([matched-string (regexp-match* iclude-pattern string)])
       (let* ( [filepath (regexp-replace iclude-pattern matched-string "\\1")])
-        (set! string (string-replace string matched-string (process-string (if (file-exists? filepath ) (file->string filepath) ""))))))
+        (set! string (string-replace string matched-string (if (file-exists? filepath ) (file->string filepath) "")))
+        )
+      )
     string))
 
 ; Getter and setter generation
@@ -23,13 +25,13 @@
              [attribute-set (non-empty-string?(regexp-replace pattern matched-string "\\7"))])
         (set! string
            (string-replace string matched-string
-              (string-append "" attribute "\n\n"
+              (string-append "" attribute "\r\n\r\n"
 
                  ;; If its the case, generate the getter
                  (if (equal? #t attribute-get)
                      (string-append (if (non-empty-string? encapsulation) (string-append encapsulation " ")  " ")
                                  attribute-type " get" (string-titlecase attribute-name)
-                                 "(){\n\t return this." attribute-name ";\n}\n\n" )
+                                 "(){\r\n\t return this." attribute-name ";\r\n}\r\n\r\n" )
                      "")
                  ;; If its the case, generate the setter
                  (if (equal? #t attribute-set)
@@ -38,7 +40,7 @@
                             (string-append encapsulation " ")
                             " ")
                         "void set" (string-titlecase attribute-name) "("
-                        attribute-type " " attribute-name "){\n\t this."
-                        attribute-name "=" attribute-name ";\n}\n\n" )
+                        attribute-type " " attribute-name "){\r\n\t this."
+                        attribute-name "=" attribute-name ";\r\n}\r\n\r\n" )
                      ""))))))
     string))

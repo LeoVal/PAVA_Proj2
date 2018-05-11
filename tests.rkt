@@ -1,7 +1,7 @@
 #lang racket
-(require "preprocess.rkt")
+(require "preprocessextra.rkt")
 
-(define verbose #f)
+(define verbose #t)
 (define total-tests 0)
 (define passed-tests 0)
 
@@ -36,9 +36,9 @@
       [process-result (process-string in-string)])
     (increment-total-tests)
     ; Print result and clean windows line-endings
-    (begin
-      ;(println process-result)
-      ;(println out-string)
+    
+    ;(println process-result)
+    ;(println out-string)
     (if (equal? process-result out-string)
         (and (increment-passing-tests) (values " \u2713"))
         (values (string-append "\u2718"
@@ -48,7 +48,7 @@
                                                   "\n================================================\n"
                                                   "============= expectation was ==================\n"
                                                   (string-replace out-string "\r\n" "\n"))
-                                   (values ""))))))))
+                                   (values "")))))))
 (define (increment-total-tests)
   (set! total-tests (add1 total-tests)))
 (define (increment-passing-tests)
